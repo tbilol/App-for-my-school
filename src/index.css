@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ───────────── Design tokens (Zamin blue / white) ─────────────
+   All colors are CSS variables so dark mode is a token swap. */
+:root {
+  --radius: 0.875rem;
+
+  --background: #ffffff;
+  --foreground: #0f172a;           /* slate-900 */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  --primary: #2563eb;              /* blue-600 — brand */
+  --primary-foreground: #ffffff;
+  --primary-soft: #eff6ff;         /* blue-50 — tinted surfaces */
+  --primary-strong: #1d4ed8;       /* blue-700 — hover/pressed */
+
+  --secondary: #f1f5f9;            /* slate-100 */
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;     /* slate-500 */
+  --accent: #eff6ff;
+  --accent-foreground: #1e40af;
+
+  --destructive: #dc2626;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --coin: #f59e0b;                 /* amber — coin glyph only */
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+
+  /* subject accents (badges/charts) */
+  --subject-english: #2563eb;
+  --subject-math: #7c3aed;
+  --subject-it: #0891b2;
+
+  --chart-1: #2563eb;
+  --chart-2: #7c3aed;
+  --chart-3: #0891b2;
+  --chart-4: #f59e0b;
+  --chart-5: #16a34a;
+}
+
+.dark {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+  --card: #111a2e;
+  --card-foreground: #e2e8f0;
+  --popover: #111a2e;
+  --popover-foreground: #e2e8f0;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --primary-soft: #172554;
+  --primary-strong: #60a5fa;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #0f172a;
+  --muted-foreground: #94a3b8;
+  --accent: #172554;
+  --accent-foreground: #bfdbfe;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #3b82f6;
+}
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-strong: var(--primary-strong);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-coin: var(--coin);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-subject-english: var(--subject-english);
+  --color-subject-math: var(--subject-math);
+  --color-subject-it: var(--subject-it);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html, body { @apply bg-background text-foreground antialiased; overflow-x: hidden; }
+  /* Safe-area insets are applied by the sticky header / bottom nav, not the body. */
+  body { -webkit-tap-highlight-color: transparent; }
+  /* numbers in balances/leaderboards shouldn't jitter */
+  .tabular { font-variant-numeric: tabular-nums; }
+}
