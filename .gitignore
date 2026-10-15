@@ -8,3 +8,6 @@ android/app/build
 ios/App/Pods
 .DS_Store
 supabase/.temp
+
+# Contains the production admin password — run manually in the SQL editor, never commit
+supabase/admin_setup.sql

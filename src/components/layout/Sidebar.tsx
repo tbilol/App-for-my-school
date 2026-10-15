@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { CoinAmount } from '@/components/CoinAmount'
@@ -6,24 +6,24 @@ import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useT } from '@/i18n'
 import { cn } from '@/lib/utils'
-import { panelNav, primaryNav, type NavItem } from './nav-items'
+import { isSectionActive, panelNav, primaryNav, type NavItem } from './nav-items'
 
 function SideLink({ item }: { item: NavItem }) {
+  const { pathname } = useLocation()
+  const active = isSectionActive(item, pathname)
   const Icon = item.icon
   return (
-    <NavLink
+    <Link
       to={item.to}
-      end={item.to === '/'}
-      className={({ isActive }) =>
-        cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-          isActive ? 'bg-primary-soft text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
-        )
-      }
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+        active ? 'bg-primary-soft text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+      )}
     >
       <Icon className="size-5" />
       {item.label}
-    </NavLink>
+    </Link>
   )
 }
 

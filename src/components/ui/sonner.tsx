@@ -6,10 +6,10 @@ import {
   TriangleAlertIcon,
 } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { useTheme } from "@/lib/theme"
 
-// Theme follows the `.dark` class on <html> once a theme toggle exists.
 const Toaster = ({ ...props }: ToasterProps) => {
-  const theme = document.documentElement.classList.contains("dark") ? "dark" : "light"
+  const { theme } = useTheme()
 
   return (
     <Sonner

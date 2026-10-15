@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Simplified Zamin "Z" for small icons (favicon, PWA, app icon). The full crest is public/logo-crest.png. -->
+  <rect width="512" height="512" rx="112" fill="#0B4DB5"/>
+  <path d="M152 124h228l8 8v52L232 332h156v56H124v-52l156-152H152a28 28 0 0 1-28-28v0a28 28 0 0 1 28-28z" fill="#FFFFFF"/>
+</svg>

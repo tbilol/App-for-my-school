@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Profile, UserRole } from '@/types/models'
+import { loginEmail } from './authEmails'
 
 interface AuthContextValue {
   session: Session | null
@@ -10,12 +11,19 @@ interface AuthContextValue {
   /** True until the stored session (and its profile, if any) has been resolved. */
   loading: boolean
   profileError: boolean
-  signIn: (email: string, password: string) => Promise<void>
+  /** Every role signs in by login + password. Throws Error('invalid_credentials'). */
+  signInLogin: (login: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   hasRole: (...roles: UserRole[]) => boolean
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
+
+async function signInWithEmail(email: string | null, password: string) {
+  if (!email) throw new Error('invalid_credentials')
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) throw new Error(/invalid login credentials/i.test(error.message) ? 'invalid_credentials' : error.message)
+}
 
 export const profileKey = (userId: string | undefined) => ['profile', userId] as const
 
@@ -74,10 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       loading: sessionLoading || (!!userId && profileQuery.isPending),
       profileError: !!userId && profileQuery.isError,
-      signIn: async (email, password) => {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        if (error) throw error
-      },
+      signInLogin: (login, password) => signInWithEmail(loginEmail(login), password),
       signOut: async () => {
         await supabase.auth.signOut()
       },

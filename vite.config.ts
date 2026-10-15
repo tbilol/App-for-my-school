@@ -10,13 +10,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'logo.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'icon-z.svg', 'logo-crest-384.png'],
       manifest: {
         name: 'Zamin Students',
         short_name: 'Zamin',
         description: "Zamin School o'quvchilari uchun coin mukofot platformasi",
         lang: 'uz',
-        theme_color: '#2563EB',
+        theme_color: '#0B4DB5',
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',
@@ -32,6 +32,7 @@ export default defineConfig({
       workbox: {
         // Offline app shell: precache built assets, SPA fallback to index.html.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        globIgnores: ['**/logo-crest.png'],   // full-res source; the app ships logo-crest-384.png
         navigateFallback: '/index.html',
         // Never cache Supabase API/auth responses — balances must be live.
         runtimeCaching: [

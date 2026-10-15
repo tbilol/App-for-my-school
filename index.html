@@ -3,12 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icon-z.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#2563EB" />
+    <meta name="theme-color" content="#0B4DB5" />
     <meta name="description" content="Zamin School o'quvchilari uchun coin mukofot platformasi" />
     <title>Zamin Students</title>
+    <!-- apply a saved dark theme before first paint (no white flash); see src/lib/theme.tsx -->
+    <script>
+      try {
+        if (localStorage.getItem('zamin.theme') === 'dark') {
+          document.documentElement.classList.add('dark')
+          document.documentElement.style.colorScheme = 'dark'
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

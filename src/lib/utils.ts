@@ -10,3 +10,10 @@ export function formatCoins(n: number) {
   const sign = n < 0 ? '-' : ''
   return sign + Math.abs(Math.trunc(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')
 }
+
+/** 2026-10-15T… → "15.10.2026". Fixed format for the same WebView reason as formatCoins. */
+export function formatDate(iso: string) {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
+}

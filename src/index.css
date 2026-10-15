@@ -36,6 +36,14 @@
   --input: #e2e8f0;
   --ring: #2563eb;
 
+  /* role themes (landing buttons + login screens) */
+  --role-student: #2563eb;
+  --role-student-soft: #eff6ff;
+  --role-teacher: #7c3aed;
+  --role-teacher-soft: #f5f3ff;
+  --role-parent: #0d9488;
+  --role-parent-soft: #f0fdfa;
+
   /* subject accents (badges/charts) */
   --subject-english: #2563eb;
   --subject-math: #7c3aed;
@@ -49,6 +57,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #0b1220;
   --foreground: #e2e8f0;
   --card: #111a2e;
@@ -68,6 +77,9 @@
   --border: #1e293b;
   --input: #1e293b;
   --ring: #3b82f6;
+  --role-student-soft: #172554;
+  --role-teacher-soft: #2e1065;
+  --role-parent-soft: #042f2e;
 }
 
 @theme inline {
@@ -101,6 +113,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-role-student: var(--role-student);
+  --color-role-student-soft: var(--role-student-soft);
+  --color-role-teacher: var(--role-teacher);
+  --color-role-teacher-soft: var(--role-teacher-soft);
+  --color-role-parent: var(--role-parent);
+  --color-role-parent-soft: var(--role-parent-soft);
   --color-subject-english: var(--subject-english);
   --color-subject-math: var(--subject-math);
   --color-subject-it: var(--subject-it);
@@ -113,7 +131,9 @@
 
 @layer base {
   * { @apply border-border outline-ring/50; }
-  html, body { @apply bg-background text-foreground antialiased; overflow-x: hidden; }
+  /* `clip`, not `hidden`: hidden turns <body> into a scroll container, which breaks
+     every position:sticky header/sidebar (they scroll away with the page). */
+  html, body { @apply bg-background text-foreground antialiased; overflow-x: clip; }
   /* Safe-area insets are applied by the sticky header / bottom nav, not the body. */
   body { -webkit-tap-highlight-color: transparent; }
   /* numbers in balances/leaderboards shouldn't jitter */
