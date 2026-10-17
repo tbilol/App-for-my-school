@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRightLeft, EllipsisVertical, GraduationCap, KeyRound, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { ArrowRightLeft, EllipsisVertical, GraduationCap, KeyRound, MessageSquare, Pencil, Trash2, UserPlus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +19,8 @@ import {
   useAddStudent, useDeleteMember, useManagedClasses, useResetPassword, useStudentLevels, useStudents, useUpdateMember, type Member,
 } from './api'
 import { StudentLevelsDialog } from './StudentLevelsDialog'
+import { useOpenConversation } from '@/features/messages/api'
+import { errorMessage } from '@/lib/errors'
 import { SUBJECTS } from '@/features/bank/api'
 import type { Subject } from '@/types/models'
 import { AccountFields, ConfirmDialog, CredentialsDialog, FormDialog, PasswordWithGenerate, type IssuedCredentials } from './dialogs'
@@ -31,8 +35,16 @@ const MIN_PASSWORD = 6   // server enforces app_config.auth.min_password_length
 /** Roster of one class at a time. Teachers see their assigned classes; admin sees all. */
 export function StudentRoster() {
   const t = useT()
-  const { hasRole } = useAuth()
+  const { profile, hasRole } = useAuth()
   const isAdmin = hasRole('admin', 'super_admin')
+  // Only the class teacher is a thread participant (admins aren't, in v1).
+  const isTeacher = profile?.role === 'teacher'
+  const navigate = useNavigate()
+  const openConversation = useOpenConversation()
+  const writeToParents = (studentId: string) => openConversation.mutate({ teacherId: profile!.id, studentId }, {
+    onSuccess: (id) => navigate(`/teacher?tab=messages&c=${id}`),
+    onError: (err) => toast.error(errorMessage(err)),
+  })
   const classes = useManagedClasses()
   const students = useStudents()
   const studentLevels = useStudentLevels()
@@ -112,6 +124,11 @@ export function StudentRoster() {
                   <Button variant="ghost" size="icon" aria-label={`${t.common.actions}: ${s.full_name}`}><EllipsisVertical /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {isTeacher && (
+                    <DropdownMenuItem onSelect={() => writeToParents(s.id)}>
+                      <MessageSquare /> {t.messages.writeToParents}
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onSelect={() => setDialog({ kind: 'levels', member: s })}>
                     <GraduationCap /> {t.studentLevel.action}
                   </DropdownMenuItem>

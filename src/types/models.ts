@@ -258,3 +258,36 @@ export interface StudentStreak {
   last_completed_on: string | null
   updated_at: string
 }
+
+// ─── Parent ↔ teacher messaging (20261024000000_messaging.sql) ───
+export type MessageKind = 'message' | 'report'
+
+export interface Message {
+  id: string
+  conversation_id: string
+  sender_id: string
+  kind: MessageKind
+  title: string | null
+  body: string
+  created_at: string
+}
+
+/** One row of list_my_conversations(): the thread plus names, last message and unread count. */
+export interface ConversationSummary {
+  id: string
+  teacher_id: string
+  teacher_name: string
+  student_id: string
+  student_name: string
+  class_name: string | null
+  guardians: { id: string; full_name: string }[]
+  created_at: string
+  last_message_at: string | null
+  last_kind: MessageKind | null
+  last_title: string | null
+  last_body: string | null
+  last_sender_id: string | null
+  unread: number
+  /** False once the teacher no longer teaches the student: history stays, sending is closed. */
+  open: boolean
+}

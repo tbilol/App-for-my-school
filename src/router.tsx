@@ -19,6 +19,7 @@ const ParentHome = lazy(() => import('@/pages/parent/ParentHome'))
 const ParentCoinsPage = lazy(() => import('@/pages/parent/ParentCoinsPage'))
 const ParentDailyPage = lazy(() => import('@/pages/parent/ParentDailyPage'))
 const ParentRatingPage = lazy(() => import('@/pages/parent/ParentRatingPage'))
+const ParentMessagesPage = lazy(() => import('@/pages/parent/ParentMessagesPage'))
 const AdminLayout = lazy(() => import('@/components/layout/AdminLayout').then((m) => ({ default: m.AdminLayout })))
 const AdminClassesPage = lazy(() => import('@/pages/admin/AdminClassesPage'))
 const AdminTeachersPage = lazy(() => import('@/pages/admin/AdminTeachersPage'))
@@ -90,6 +91,8 @@ export const router = createBrowserRouter([
               { path: 'coins', element: <ParentCoinsPage /> },
               { path: 'daily', element: <ParentDailyPage /> },
               { path: 'rating', element: <ParentRatingPage /> },
+              { path: 'messages', element: <ParentMessagesPage /> },
+              { path: 'messages/:id', element: <ParentMessagesPage /> },
               { path: '*', element: <Navigate to="/parent" replace /> },
             ],
           },

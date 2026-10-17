@@ -1,11 +1,13 @@
 import { Suspense, useState } from 'react'
 import { Link, Outlet, useLocation, useOutletContext } from 'react-router-dom'
-import { CalendarCheck, Coins, House, Loader2, LogOut, Trophy, type LucideIcon } from 'lucide-react'
+import { CalendarCheck, Coins, House, Loader2, LogOut, MessagesSquare, Trophy, type LucideIcon } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useMyChildren, type Child } from '@/features/parent/api'
+import { unreadTotal, useConversations } from '@/features/messages/api'
+import { UnreadBadge } from '@/features/messages/components'
 import { cn } from '@/lib/utils'
 import { t as dict, useT } from '@/i18n'
 
@@ -14,6 +16,7 @@ const NAV: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/parent/coins', label: dict.parent.navCoins, icon: Coins },
   { to: '/parent/daily', label: dict.parent.navDaily, icon: CalendarCheck },
   { to: '/parent/rating', label: dict.parent.navRating, icon: Trophy },
+  { to: '/parent/messages', label: dict.parent.navMessages, icon: MessagesSquare },
 ]
 
 const STORE_KEY = 'zamin.parent.child'
@@ -35,6 +38,9 @@ export function ParentLayout() {
   const children = useMyChildren()
   const [selected, setSelected] = useState<string | null>(readStored)
   const child = children.data?.find((c) => c.id === selected) ?? children.data?.[0]
+  const conversations = useConversations()
+  // badge on Xabarlar = the selected child's unread; the switcher marks other children with unread
+  const badgeOf = (to: string) => (to === '/parent/messages' && child ? unreadTotal(conversations.data, child.id) : 0)
 
   const select = (id: string) => {
     setSelected(id)
@@ -61,7 +67,7 @@ export function ParentLayout() {
               <Link key={to} to={to} aria-current={isActive(to) ? 'page' : undefined}
                 className={cn('flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
                   isActive(to) ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>
-                <Icon className="size-4" /> {label}
+                <Icon className="size-4" /> {label}<UnreadBadge n={badgeOf(to)} />
               </Link>
             ))}
           </nav>
@@ -84,6 +90,7 @@ export function ParentLayout() {
                       c.id === child.id ? 'border-primary bg-primary-soft text-primary' : 'bg-card hover:bg-secondary')}
                   >
                     <UserAvatar name={c.full_name} url={c.avatar_url} className="size-7" /> {c.full_name.split(' ')[0]}
+                    {c.id !== child.id && <UnreadBadge n={unreadTotal(conversations.data, c.id)} className="h-4 min-w-4 px-1 text-[10px]" />}
                   </button>
                 ))}
               </div>
@@ -97,7 +104,7 @@ export function ParentLayout() {
 
       {hasNav && (
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label={t.parent.nav}>
-          <ul className="grid grid-cols-4">
+          <ul className="grid grid-cols-5">
             {NAV.map(({ to, label, icon: Icon }) => {
               const active = isActive(to)
               return (
@@ -105,8 +112,9 @@ export function ParentLayout() {
                   <Link to={to} aria-current={active ? 'page' : undefined}
                     className={cn('flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors',
                       active ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}>
-                    <span className={cn('grid h-7 w-12 place-items-center rounded-full transition-colors', active && 'bg-primary-soft')}>
+                    <span className={cn('relative grid h-7 w-12 place-items-center rounded-full transition-colors', active && 'bg-primary-soft')}>
                       <Icon className="size-5" strokeWidth={active ? 2.4 : 2} />
+                      <UnreadBadge n={badgeOf(to)} className="absolute -top-1 right-0.5 h-4 min-w-4 px-1 text-[10px]" />
                     </span>
                     <span className="max-w-full truncate px-0.5">{label}</span>
                   </Link>
