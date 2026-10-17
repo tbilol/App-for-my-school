@@ -29,6 +29,7 @@ const AdminEventsPage = lazy(() => import('@/pages/admin/AdminEventsPage'))
 const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'))
 const AdminEconomyPage = lazy(() => import('@/pages/admin/AdminEconomyPage'))
 const AdminAdminsPage = lazy(() => import('@/pages/admin/AdminAdminsPage'))
+const AdminBankPage = lazy(() => import('@/pages/admin/AdminBankPage'))
 
 export const router = createBrowserRouter([
   // ── Onboarding (signed-out only)
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
               { path: 'teachers', element: <AdminTeachersPage /> },
               { path: 'students', element: <AdminStudentsPage /> },
               { path: 'parents', element: <AdminParentsPage /> },
+              { path: 'bank', element: <AdminBankPage /> },
               { path: 'shop', element: <AdminShopPage /> },
               { path: 'orders', element: <AdminOrdersPage /> },
               { path: 'achievements', element: <AdminAchievementsPage /> },

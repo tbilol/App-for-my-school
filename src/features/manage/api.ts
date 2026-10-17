@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthProvider'
-import type { ClassRow, Profile } from '@/types/models'
+import type { ClassRow, Profile, StudentLevel, Subject } from '@/types/models'
 
 // Data layer for roster/parent/teacher management. Every read is narrowed by
 // RLS on the server (teachers only get their classes); the filters here are
@@ -22,6 +22,7 @@ export const manageKeys = {
   parents: ['manage', 'parents'] as const,
   teachers: ['manage', 'teachers'] as const,
   admins: ['manage', 'admins'] as const,
+  studentLevels: ['manage', 'student-levels'] as const,
   assignments: ['manage', 'assignments'] as const,
 }
 
@@ -84,6 +85,14 @@ export function useAdmins() {
   })
 }
 
+/** Daily-task levels of every student the caller manages (RLS-scoped). */
+export function useStudentLevels() {
+  return useQuery({
+    queryKey: manageKeys.studentLevels,
+    queryFn: () => rows<StudentLevel[]>(supabase.from('student_levels').select('*')),
+  })
+}
+
 /** Admin: every teacher↔class assignment. */
 export function useAssignments() {
   return useQuery({
@@ -134,6 +143,11 @@ export const useUnlinkParent = () =>
 export const useUpdateMember = () =>
   useManageMutation((a: { userId: string; fullName?: string; classId?: string }) =>
     rpc<Profile>('update_member', { p_user: a.userId, p_full_name: a.fullName ?? null, p_class_id: a.classId ?? null }))
+
+/** levelId null clears the subject's level. */
+export const useSetStudentLevel = () =>
+  useManageMutation((a: { studentId: string; subject: Subject; levelId: string | null }) =>
+    rpc<StudentLevel | null>('set_student_level', { p_student: a.studentId, p_subject: a.subject, p_level: a.levelId }))
 
 export const useResetPassword = () =>
   useManageMutation((a: { userId: string; newPassword: string }) =>

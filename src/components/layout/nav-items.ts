@@ -1,5 +1,5 @@
 import {
-  Award, CalendarDays, Coins, GraduationCap, HeartHandshake, House, ListChecks, Megaphone, Package, Presentation, School,
+  Award, CalendarDays, Library, Coins, GraduationCap, HeartHandshake, House, ListChecks, Megaphone, Package, Presentation, School,
   Settings, ShieldCheck, ShoppingBag, Trophy, User, Users, type LucideIcon,
 } from 'lucide-react'
 import { t } from '@/i18n'
@@ -51,6 +51,7 @@ export const adminNav: NavItem[] = [
   { to: '/admin/teachers', label: t.nav.teachers, icon: Presentation },
   { to: '/admin/students', label: t.nav.students, icon: Users },
   { to: '/admin/parents', label: t.nav.parents, icon: HeartHandshake },
+  { to: '/admin/bank', label: t.nav.bank, icon: Library },
   { to: '/admin/shop', label: t.nav.shop, icon: ShoppingBag },
   { to: '/admin/orders', label: t.nav.orders, icon: Package },
   { to: '/admin/achievements', label: t.nav.achievements, icon: Award },
