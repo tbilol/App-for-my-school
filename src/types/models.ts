@@ -237,6 +237,17 @@ export interface DailyItem {
   answered_at: string | null
 }
 
+/** submit_daily_item's result: the answered item plus what the UI needs next. */
+export interface DailySubmitResult extends DailyItem {
+  /** Revealed only after answering; null for text items. Choice indices are 0-based. */
+  correct_answer: { correct?: number | number[]; value?: string; values?: string[] } | null
+  set_status: DailySetStatus
+  /** Set once completed: true = on its own day (bonus + streak). */
+  set_on_time: boolean | null
+  /** Coins this set has paid so far (items + completion bonus). */
+  set_coins: number
+}
+
 /** subject null = the overall streak (every subject on time that day). */
 export interface StudentStreak {
   id: string

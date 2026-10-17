@@ -7,7 +7,7 @@ import LandingPage from '@/pages/onboarding/LandingPage'
 
 // Signed-in apps are code-split: a student never downloads the admin app and vice versa.
 const HomePage = lazy(() => import('@/pages/HomePage'))
-const ChallengesPage = lazy(() => import('@/pages/ChallengesPage'))
+const DailyPage = lazy(() => import('@/pages/DailyPage'))
 const ShopPage = lazy(() => import('@/pages/ShopPage'))
 const RatingsPage = lazy(() => import('@/pages/RatingsPage'))
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
@@ -16,6 +16,9 @@ const AnnouncementsPage = lazy(() => import('@/pages/AnnouncementsPage'))
 const TeacherPanel = lazy(() => import('@/pages/TeacherPanel'))
 const ParentLayout = lazy(() => import('@/components/layout/ParentLayout').then((m) => ({ default: m.ParentLayout })))
 const ParentHome = lazy(() => import('@/pages/parent/ParentHome'))
+const ParentCoinsPage = lazy(() => import('@/pages/parent/ParentCoinsPage'))
+const ParentDailyPage = lazy(() => import('@/pages/parent/ParentDailyPage'))
+const ParentRatingPage = lazy(() => import('@/pages/parent/ParentRatingPage'))
 const AdminLayout = lazy(() => import('@/components/layout/AdminLayout').then((m) => ({ default: m.AdminLayout })))
 const AdminClassesPage = lazy(() => import('@/pages/admin/AdminClassesPage'))
 const AdminTeachersPage = lazy(() => import('@/pages/admin/AdminTeachersPage'))
@@ -54,7 +57,12 @@ export const router = createBrowserRouter([
             element: <AppLayout />,
             children: [
               { index: true, element: <HomePage /> },
-              { path: 'challenges', element: <ChallengesPage /> },
+              // The old challenges page is retired (ChallengesPage.tsx kept, unrouted); daily tasks replace it.
+              { path: 'challenges', element: <Navigate to="/daily" replace /> },
+              {
+                element: <RequireRole roles={['student']} />,
+                children: [{ path: 'daily', element: <DailyPage /> }],
+              },
               { path: 'shop', element: <ShopPage /> },
               { path: 'ratings', element: <RatingsPage /> },
               { path: 'profile', element: <ProfilePage /> },
@@ -74,7 +82,17 @@ export const router = createBrowserRouter([
       {
         element: <RequireRole roles={['parent']} />,
         children: [
-          { path: '/parent', element: <ParentLayout />, children: [{ index: true, element: <ParentHome /> }] },
+          {
+            path: '/parent',
+            element: <ParentLayout />,
+            children: [
+              { index: true, element: <ParentHome /> },
+              { path: 'coins', element: <ParentCoinsPage /> },
+              { path: 'daily', element: <ParentDailyPage /> },
+              { path: 'rating', element: <ParentRatingPage /> },
+              { path: '*', element: <Navigate to="/parent" replace /> },
+            ],
+          },
         ],
       },
       {

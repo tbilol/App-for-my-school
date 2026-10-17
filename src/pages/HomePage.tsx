@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Activity, ChevronRight, GraduationCap, ListChecks, ShoppingBag, Target, Trophy, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,9 +6,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CoinAmount } from '@/components/CoinAmount'
 import { useAuth } from '@/features/auth/AuthProvider'
 import {
-  schoolToday, useChallenges, useClasses, useConfig, useLeaderboard, useMySubmissions, useMyTransactions, useShopItems,
+  schoolToday, useClasses, useConfig, useLeaderboard, useMyTransactions, useShopItems,
 } from '@/features/school/api'
 import { HomeFeedPanel } from '@/features/school/HomeFeedPanel'
+import { TodayCard } from '@/features/daily/TodayCard'
+import { useMyDailySets } from '@/features/daily/api'
 import { EmptyState, SectionCard, TxRow } from '@/features/school/components'
 import { cn, formatCoins } from '@/lib/utils'
 import { fmt, useT } from '@/i18n'
@@ -35,8 +36,7 @@ export default function HomePage() {
   const board = useLeaderboard(null)
   const tx = useMyTransactions(5)
   const classes = useClasses()
-  const challenges = useChallenges()
-  const subs = useMySubmissions()
+  const sets = useMyDailySets()
   const shop = useShopItems()
   const today = schoolToday()
 
@@ -46,12 +46,8 @@ export default function HomePage() {
   const me = board.data?.find((r) => r.user_id === profile?.id)
 
   // Quick-tile numbers
-  const todo = useMemo(() => {
-    const done = new Set((subs.data ?? []).filter((s) => s.submitted_on === today).map((s) => s.challenge_id))
-    const everDone = new Set((subs.data ?? []).filter((s) => s.status !== 'rejected').map((s) => s.challenge_id))
-    return (challenges.data ?? []).filter((c) =>
-      c.type !== 'streak' && !done.has(c.id) && !(c.recurrence === 'once' && everDone.has(c.id))).length
-  }, [challenges.data, subs.data, today])
+  const todays = (sets.data ?? []).filter((s) => s.set_date === today)
+  const todo = todays.filter((s) => s.status !== 'completed').length
   const affordable = (shop.data ?? []).filter((i) => i.stock > 0 && i.coin_price <= balance).length
   const goalPct = goal.data ? Math.min(100, (balance / goal.data.coins) * 100) : 0
 
@@ -97,10 +93,12 @@ export default function HomePage() {
             )}
           </div>
 
+          <TodayCard />
+
           {/* Quick links */}
           <div className="grid grid-cols-3 gap-2.5 sm:gap-3" data-testid="quick-tiles">
-            <QuickTile to="/challenges" icon={ListChecks} label={t.home.tileChallenges} tone="bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
-              value={todo > 0 ? fmt(t.home.tileChallengesTodo, { n: todo }) : t.home.tileChallengesDone} />
+            <QuickTile to="/daily" icon={ListChecks} label={t.home.tileChallenges} tone="bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
+              value={todo > 0 ? fmt(t.home.tileChallengesTodo, { n: todo }) : todays.length ? t.home.tileChallengesDone : '—'} />
             <QuickTile to="/shop" icon={ShoppingBag} label={t.home.tileShop} tone="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
               value={affordable > 0 ? fmt(t.home.tileShopCan, { n: affordable }) : t.home.tileShopNone} />
             <QuickTile to="/ratings" icon={Trophy} label={t.home.tileRating} tone="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"

@@ -1,5 +1,5 @@
 import {
-  Award, CalendarDays, Library, Coins, GraduationCap, HeartHandshake, House, ListChecks, Megaphone, Package, Presentation, School,
+  Award, CalendarCheck, CalendarDays, Library, Coins, GraduationCap, HeartHandshake, House, Megaphone, Package, Presentation, School,
   Settings, ShieldCheck, ShoppingBag, Trophy, User, Users, type LucideIcon,
 } from 'lucide-react'
 import { t } from '@/i18n'
@@ -18,12 +18,13 @@ export interface NavItem {
   owns?: string[]
 }
 
-/** The 5 student-app sections — same set in the phone bottom bar and the desktop sidebar. */
+/** The student-app sections — same set in the phone bottom bar and the desktop sidebar (items with `roles` are filtered). */
 export const primaryNav: NavItem[] = [
   { to: '/', label: t.nav.home, icon: House, owns: ['/events', '/announcements'] },
+  // Daily tasks took over the "Vazifalar" tab; the old challenges page is unrouted (/challenges → /daily).
+  { to: '/daily', label: t.nav.challenges, icon: CalendarCheck, roles: ['student'] },
   { to: '/shop', label: t.nav.shop, icon: ShoppingBag },
   { to: '/ratings', label: t.nav.ratings, icon: Trophy },
-  { to: '/challenges', label: t.nav.challenges, icon: ListChecks },
   { to: '/profile', label: t.nav.profile, icon: User, owns: ['/achievements'] },
 ]
 
