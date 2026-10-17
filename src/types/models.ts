@@ -159,3 +159,91 @@ export interface Submission {
   submitted_on: string
   created_at: string
 }
+
+// ───────── Daily tasks (20261020000000_daily_tasks.sql) ─────────
+
+export type TaskSkill = 'grammar' | 'reading' | 'writing' | 'math' | 'it'
+/** choice / exact are auto-graded; text is reviewed by a teacher. */
+export type AnswerMode = 'choice' | 'exact' | 'text'
+export type DailySetStatus = 'pending' | 'completed'
+export type DailyItemStatus = 'pending' | 'answered' | 'approved' | 'rejected'
+
+export interface Level {
+  id: string
+  subject: Subject
+  ord: number
+  name: string
+  active: boolean
+  created_at: string
+}
+
+export interface StudentLevel {
+  user_id: string
+  subject: Subject
+  level_id: string
+  set_by: string | null
+  updated_at: string
+}
+
+/** Item body: `options` for choice items; reading items may carry a `passage`. */
+export interface TaskBody { options?: string[]; passage?: string; [key: string]: unknown }
+
+/** Staff only (RLS). Answer keys live in task_bank_keys, never here. */
+export interface TaskBankItem {
+  id: string
+  subject: Subject
+  level_id: string
+  skill: TaskSkill
+  answer_mode: AnswerMode
+  prompt: string
+  body: TaskBody
+  difficulty: number
+  active: boolean
+  created_by: string | null
+  created_at: string
+}
+
+export interface DailySet {
+  id: string
+  user_id: string
+  subject: Subject
+  set_date: string
+  status: DailySetStatus
+  /** Set when completed: true only if finished on set_date itself. */
+  on_time: boolean | null
+  completed_at: string | null
+  created_at: string
+}
+
+/** What submit_daily_item takes, per answer mode. */
+export type DailyAnswer = { choice: number } | { value: string } | { text: string }
+
+/** Snapshot of a bank item inside a set. Never contains the correct answer. */
+export interface DailyItem {
+  id: string
+  set_id: string
+  task_id: string
+  ord: number
+  skill: TaskSkill
+  answer_mode: AnswerMode
+  prompt: string
+  body: TaskBody
+  status: DailyItemStatus
+  student_answer: DailyAnswer | null
+  is_correct: boolean | null
+  coins_awarded: number
+  reviewed_by: string | null
+  reviewed_at: string | null
+  answered_at: string | null
+}
+
+/** subject null = the overall streak (every subject on time that day). */
+export interface StudentStreak {
+  id: string
+  user_id: string
+  subject: Subject | null
+  current_streak: number
+  longest_streak: number
+  last_completed_on: string | null
+  updated_at: string
+}
