@@ -1,6 +1,6 @@
 import {
   Award, CalendarDays, Coins, GraduationCap, HeartHandshake, House, ListChecks, Megaphone, Package, Presentation, School,
-  Settings, ShoppingBag, Trophy, User, Users, type LucideIcon,
+  Settings, ShieldCheck, ShoppingBag, Trophy, User, Users, type LucideIcon,
 } from 'lucide-react'
 import { t } from '@/i18n'
 import type { UserRole } from '@/types/models'
@@ -45,7 +45,7 @@ export const panelNav: NavItem[] = [
   { to: '/teacher', label: t.nav.teacher, icon: GraduationCap, roles: ['teacher'] },
 ]
 
-/** Admin app navigation (separate shell). */
+/** Admin app navigation (separate shell). Items with `roles` are filtered by the signed-in role. */
 export const adminNav: NavItem[] = [
   { to: '/admin/classes', label: t.nav.classes, icon: School },
   { to: '/admin/teachers', label: t.nav.teachers, icon: Presentation },
@@ -58,4 +58,5 @@ export const adminNav: NavItem[] = [
   { to: '/admin/announcements', label: t.nav.announcements, icon: Megaphone },
   { to: '/admin/economy', label: t.nav.economy, icon: Coins },
   { to: '/admin/settings', label: t.nav.settings, icon: Settings },
+  { to: '/admin/admins', label: t.nav.admins, icon: ShieldCheck, roles: ['super_admin'] },
 ]

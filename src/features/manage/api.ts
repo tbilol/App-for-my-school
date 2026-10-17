@@ -21,13 +21,14 @@ export const manageKeys = {
   students: ['manage', 'students'] as const,
   parents: ['manage', 'parents'] as const,
   teachers: ['manage', 'teachers'] as const,
+  admins: ['manage', 'admins'] as const,
   assignments: ['manage', 'assignments'] as const,
 }
 
 /** Classes the caller may manage: all for admin, assigned ones for teachers. */
 export function useManagedClasses() {
-  const { profile } = useAuth()
-  const isAdmin = profile?.role === 'admin'
+  const { profile, hasRole } = useAuth()
+  const isAdmin = hasRole('admin', 'super_admin')
   return useQuery({
     queryKey: [...manageKeys.classes, profile?.id],
     enabled: !!profile,
@@ -75,6 +76,14 @@ export function useTeachers() {
   })
 }
 
+/** Super admin: every admin-tier account (RLS: staff read all profiles). */
+export function useAdmins() {
+  return useQuery({
+    queryKey: manageKeys.admins,
+    queryFn: () => rows<Member[]>(supabase.from('profiles').select(MEMBER_COLS).in('role', ['admin', 'super_admin']).order('full_name')),
+  })
+}
+
 /** Admin: every teacher↔class assignment. */
 export function useAssignments() {
   return useQuery({
@@ -107,6 +116,10 @@ export const useAddStudent = () =>
 export const useCreateTeacher = () =>
   useManageMutation(async (a: { fullName: string; password: string }) =>
     (await rpc<CreatedAccount[]>('create_teacher', { p_full_name: a.fullName, p_password: a.password }))[0])
+
+export const useCreateAdmin = () =>
+  useManageMutation(async (a: { fullName: string; password: string }) =>
+    (await rpc<CreatedAccount[]>('create_admin', { p_full_name: a.fullName, p_password: a.password }))[0])
 
 export const useCreateParent = () =>
   useManageMutation(async (a: { fullName: string; password: string; studentIds: string[] }) =>

@@ -1,7 +1,7 @@
 // Hand-written row types mirroring supabase/migrations. Replace with the
 // generated `Database` types (npm run db:types) once a project is linked.
 
-export type UserRole = 'student' | 'teacher' | 'parent' | 'admin'
+export type UserRole = 'student' | 'teacher' | 'parent' | 'admin' | 'super_admin'
 export type Subject = 'english' | 'math' | 'it'
 export type CoinDirection = 'earn' | 'spend'
 export type CoinCategory = 'class_activity' | 'achievement' | 'event' | 'challenge' | 'purchase' | 'adjustment'

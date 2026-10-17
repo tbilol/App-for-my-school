@@ -4,7 +4,6 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { RedirectIfAuthed, RequireAuth, RequireRole } from '@/features/auth/guards'
 import NotFoundPage from '@/pages/NotFoundPage'
 import LandingPage from '@/pages/onboarding/LandingPage'
-import LoginFormPage from '@/pages/onboarding/LoginFormPage'
 
 // Signed-in apps are code-split: a student never downloads the admin app and vice versa.
 const HomePage = lazy(() => import('@/pages/HomePage'))
@@ -29,18 +28,16 @@ const AdminAchievementsPage = lazy(() => import('@/pages/admin/AdminAchievements
 const AdminEventsPage = lazy(() => import('@/pages/admin/AdminEventsPage'))
 const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'))
 const AdminEconomyPage = lazy(() => import('@/pages/admin/AdminEconomyPage'))
+const AdminAdminsPage = lazy(() => import('@/pages/admin/AdminAdminsPage'))
 
 export const router = createBrowserRouter([
   // ── Onboarding (signed-out only)
   {
     element: <RedirectIfAuthed />,
     children: [
+      // One login form for every role; the profile's role decides where it lands.
       { path: '/welcome', element: <LandingPage /> },
       { path: '/login', element: <Navigate to="/welcome" replace /> },
-      // Any form accepts any account; the profile's role decides where it lands.
-      { path: '/login/student', element: <LoginFormPage role="student" /> },
-      { path: '/login/teacher', element: <LoginFormPage role="teacher" /> },
-      { path: '/login/parent', element: <LoginFormPage role="parent" /> },
       { path: '/login/*', element: <Navigate to="/welcome" replace /> },
     ],
   },
@@ -80,7 +77,7 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        element: <RequireRole roles={['admin']} />,
+        element: <RequireRole roles={['admin', 'super_admin']} />,
         children: [
           {
             path: '/admin',
@@ -98,6 +95,10 @@ export const router = createBrowserRouter([
               { path: 'announcements', element: <AdminAnnouncementsPage /> },
               { path: 'economy', element: <AdminEconomyPage /> },
               { path: 'settings', element: <AdminSettingsPage /> },
+              {
+                element: <RequireRole roles={['super_admin']} />,
+                children: [{ path: 'admins', element: <AdminAdminsPage /> }],
+              },
               { path: '*', element: <Navigate to="classes" replace /> },
             ],
           },

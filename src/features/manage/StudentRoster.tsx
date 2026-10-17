@@ -27,8 +27,8 @@ const MIN_PASSWORD = 6   // server enforces app_config.auth.min_password_length
 /** Roster of one class at a time. Teachers see their assigned classes; admin sees all. */
 export function StudentRoster() {
   const t = useT()
-  const { profile } = useAuth()
-  const isAdmin = profile?.role === 'admin'
+  const { hasRole } = useAuth()
+  const isAdmin = hasRole('admin', 'super_admin')
   const classes = useManagedClasses()
   const students = useStudents()
   const [classId, setClassId] = useState<string>('')
