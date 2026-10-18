@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useSelectedChild } from '@/components/layout/ParentLayout'
 import { useChildTotals, useChildTransactions } from '@/features/parent/api'
 import { EmptyState, SectionCard, TxRow } from '@/features/school/components'
+import { groupDailyTx } from '@/features/school/txGroups'
 import { cn, formatCoins } from '@/lib/utils'
 import { useT } from '@/i18n'
 
@@ -17,7 +18,7 @@ export default function ParentCoinsPage() {
   const tx = useChildTransactions(child.id)
   const totals = useChildTotals(child.id)
   const [filter, setFilter] = useState<'all' | 'earn' | 'spend'>('all')
-  const shown = (tx.data?.pages.flat() ?? []).filter((r) => filter === 'all' || r.direction === filter)
+  const shown = groupDailyTx(tx.data?.pages.flat() ?? []).filter((r) => filter === 'all' || r.direction === filter)
 
   return (
     <div className="space-y-4">

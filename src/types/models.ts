@@ -246,6 +246,10 @@ export interface DailySubmitResult extends DailyItem {
   set_on_time: boolean | null
   /** Coins this set has paid so far (items + completion bonus). */
   set_coins: number
+  /** Correct auto-graded answers so far / items in the set / completion bonus included (0 when late or open). */
+  set_correct: number
+  set_total: number
+  set_bonus: number
 }
 
 /** subject null = the overall streak (every subject on time that day). */

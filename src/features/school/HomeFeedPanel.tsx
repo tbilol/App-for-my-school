@@ -14,7 +14,7 @@ const RECENT_DAYS = 3   // announcements newer than this get the "Yangi" dot
  * expands in place to show the latest announcements and the next events, each
  * with a link to its full page.
  */
-export function HomeFeedPanel() {
+export function HomeFeedPanel({ announcementsTo = '/announcements', eventsTo = '/events' }: { announcementsTo?: string; eventsTo?: string } = {}) {
   const t = useT()
   const id = useId()
   const [open, setOpen] = useState(false)
@@ -75,7 +75,7 @@ export function HomeFeedPanel() {
                   ))}
                 </ul>
               )}
-              <Link to="/announcements" className="mt-2 inline-flex items-center gap-0.5 text-sm font-medium text-primary hover:underline">
+              <Link to={announcementsTo} className="mt-2 inline-flex items-center gap-0.5 text-sm font-medium text-primary hover:underline">
                 {t.home.allAnnouncements} <ChevronRight className="size-4" />
               </Link>
             </div>
@@ -109,7 +109,7 @@ export function HomeFeedPanel() {
                   })}
                 </ul>
               )}
-              <Link to="/events" className="mt-2 inline-flex items-center gap-0.5 text-sm font-medium text-primary hover:underline">
+              <Link to={eventsTo} className="mt-2 inline-flex items-center gap-0.5 text-sm font-medium text-primary hover:underline">
                 {t.home.allEvents} <ChevronRight className="size-4" />
               </Link>
             </div>

@@ -12,6 +12,7 @@ import { HomeFeedPanel } from '@/features/school/HomeFeedPanel'
 import { TodayCard } from '@/features/daily/TodayCard'
 import { useMyDailySets } from '@/features/daily/api'
 import { EmptyState, SectionCard, TxRow } from '@/features/school/components'
+import { groupDailyTx } from '@/features/school/txGroups'
 import { cn, formatCoins } from '@/lib/utils'
 import { fmt, useT } from '@/i18n'
 
@@ -34,7 +35,9 @@ export default function HomePage() {
   const isStudent = profile?.role === 'student'
   const goal = useConfig<{ title: string; coins: number }>('big_goal')
   const board = useLeaderboard(null)
-  const tx = useMyTransactions(5)
+  // enough rows that the last 5 lines survive daily-task grouping
+  const tx = useMyTransactions(40)
+  const recent = groupDailyTx(tx.data ?? []).slice(0, 5)
   const classes = useClasses()
   const sets = useMyDailySets()
   const shop = useShopItems()
@@ -117,8 +120,8 @@ export default function HomePage() {
 
       {isStudent && (
         <SectionCard title={t.home.recentActivity} to="/profile" className="rounded-2xl">
-          {tx.isPending ? <Skeleton className="m-4 h-24" /> : !tx.data?.length ? <EmptyState icon={Activity} text={t.home.noActivity} /> : (
-            <ul className="divide-y" data-testid="recent-activity">{tx.data.map((r) => <TxRow key={r.id} tx={r} />)}</ul>
+          {tx.isPending ? <Skeleton className="m-4 h-24" /> : !recent.length ? <EmptyState icon={Activity} text={t.home.noActivity} /> : (
+            <ul className="divide-y" data-testid="recent-activity">{recent.map((r) => <TxRow key={r.id} tx={r} />)}</ul>
           )}
         </SectionCard>
       )}

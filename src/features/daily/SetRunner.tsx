@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { CoinAmount } from '@/components/CoinAmount'
+import { CoinIcon } from '@/components/CoinAmount'
 import { subjectStyle } from '@/features/school/components'
 import { errorMessage } from '@/lib/errors'
-import { cn } from '@/lib/utils'
+import { cn, formatCoins } from '@/lib/utils'
 import { fmt, useT } from '@/i18n'
 import type { DailyItem, DailySubmitResult } from '@/types/models'
 import { formatDay, useDailyItems, useMyStreaks, useSubmitDailyItem, type DailySetWithProgress } from './api'
@@ -86,7 +86,13 @@ function Celebration({ set, result, today, hasWriting, onDone }: {
       <div className="mt-5 grid grid-cols-2 gap-2.5">
         <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-500/10">
           <div className="text-xs text-muted-foreground">{t.daily.setCoins}</div>
-          <CoinAmount value={result.set_coins} className="mt-1 justify-center text-2xl" iconClassName="size-6" />
+          <div className="mt-1 flex items-center justify-center gap-1 text-xl font-bold whitespace-nowrap text-amber-600 tabular sm:text-2xl dark:text-amber-400" data-testid="set-total">
+            <CoinIcon className="size-6" /> {fmt(t.daily.setTotal, { n: formatCoins(result.set_coins) })}
+          </div>
+          <div className="mt-0.5 text-[11px] text-muted-foreground tabular" data-testid="set-breakdown">
+            {fmt(t.daily.breakdown, { c: result.set_correct, total: result.set_total })}
+            {result.set_bonus > 0 && <> · {fmt(t.daily.breakdownBonus, { n: result.set_bonus })}</>}
+          </div>
         </div>
         <div className="rounded-2xl bg-orange-50 p-3 dark:bg-orange-500/10">
           <div className="text-xs text-muted-foreground">{t.daily.streak}</div>
@@ -127,6 +133,8 @@ export function SetRunner({ set, today, onClose }: { set: DailySetWithProgress; 
 
   const item = idx !== null ? list[idx] : undefined
   const answered = list.filter((i) => i.status !== 'pending').length
+  // visual only: what the answers so far are worth — credited once, when the set completes
+  const tally = list.reduce((n, i) => n + (i.status !== 'pending' && i.answer_mode !== 'text' ? i.coins_awarded : 0), 0)
 
   function resetDraft() { setChoice(null); setValue(''); setText(''); setResult(null) }
 
@@ -179,7 +187,15 @@ export function SetRunner({ set, today, onClose }: { set: DailySetWithProgress; 
             </span>
             <span className="shrink-0 text-xs text-muted-foreground tabular">{fmt(t.daily.question, { n: idx + 1, total: list.length })}</span>
           </div>
-          <Progress value={(answered / Math.max(list.length, 1)) * 100} className="mt-1.5 h-2" aria-label={fmt(t.daily.progress, { done: answered, total: list.length })} />
+          <div className="mt-1.5 flex items-center gap-2">
+            <Progress value={(answered / Math.max(list.length, 1)) * 100} className="h-2 flex-1" aria-label={fmt(t.daily.progress, { done: answered, total: list.length })} />
+            {tally > 0 && (
+              <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-1.5 text-[11px] leading-5 font-semibold text-amber-700 tabular dark:bg-amber-500/15 dark:text-amber-300"
+                title={t.daily.tallyHint} aria-label={`${fmt(t.daily.tally, { n: tally })}. ${t.daily.tallyHint}`} data-testid="tally">
+                <CoinIcon className="size-3" /> +{tally}
+              </span>
+            )}
+          </div>
         </div>
         {set.subject === 'math' && (
           <span className="flex shrink-0 items-center gap-1 rounded-full bg-subject-math/10 px-2.5 py-1 text-sm font-semibold text-subject-math tabular" title={t.daily.timerHint} aria-label={`${t.daily.timer}: ${timer}`} data-testid="stopwatch">
@@ -258,7 +274,12 @@ export function SetRunner({ set, today, onClose }: { set: DailySetWithProgress; 
             <div className="mt-4 flex items-center gap-2.5 rounded-2xl bg-success/10 px-4 py-3 text-success motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1" data-testid="feedback-correct">
               <CircleCheck className="size-6 shrink-0" />
               <span className="flex-1 font-semibold">{t.daily.correct}</span>
-              {result.coins_awarded > 0 && <span className="text-sm font-semibold">{fmt(t.daily.coinsEarned, { n: result.coins_awarded })}</span>}
+              {result.coins_awarded > 0 && (
+                <span className="text-right text-sm leading-tight font-semibold">
+                  {fmt(t.daily.coinsEarned, { n: result.coins_awarded })}
+                  <span className="block text-[11px] font-normal opacity-80">{fmt(t.daily.tally, { n: tally })}</span>
+                </span>
+              )}
             </div>
           ) : (
             <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-destructive/10 px-4 py-3 text-destructive motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1" data-testid="feedback-wrong">

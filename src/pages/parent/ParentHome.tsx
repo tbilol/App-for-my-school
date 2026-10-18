@@ -6,7 +6,9 @@ import { useSelectedChild } from '@/components/layout/ParentLayout'
 import { useChildTransactions } from '@/features/parent/api'
 import { StreakAndRank, TodayStatus } from '@/features/parent/components'
 import { useClasses } from '@/features/school/api'
+import { HomeFeedPanel } from '@/features/school/HomeFeedPanel'
 import { EmptyState, SectionCard, TxRow } from '@/features/school/components'
+import { groupDailyTx } from '@/features/school/txGroups'
 import { useT } from '@/i18n'
 
 /** Parent overview: balance, today's tasks, streak, rank, latest coins. */
@@ -16,7 +18,7 @@ export default function ParentHome() {
   const classes = useClasses()
   const tx = useChildTransactions(child.id)
   const className = classes.data?.find((c) => c.id === child.class_id)?.name
-  const recent = tx.data?.pages[0]?.slice(0, 5) ?? []
+  const recent = groupDailyTx(tx.data?.pages[0] ?? []).slice(0, 5)
 
   return (
     <div className="space-y-4">
@@ -38,6 +40,8 @@ export default function ParentHome() {
       </SectionCard>
 
       <StreakAndRank childId={child.id} />
+
+      <HomeFeedPanel announcementsTo="/parent/school" eventsTo="/parent/school?tab=events" />
 
       <SectionCard title={t.parent.recent} to="/parent/coins" className="rounded-2xl">
         {tx.isPending ? <Skeleton className="m-4 h-24" /> : !recent.length ? <EmptyState icon={History} text={t.parent.noActivity} /> : (

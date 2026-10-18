@@ -55,9 +55,14 @@ export function ParentLayout() {
         <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-2 px-4">
           <Logo />
           <div className="flex min-w-0 items-center gap-1">
-            <span className="hidden truncate text-sm text-muted-foreground sm:inline">{profile?.full_name}</span>
-            <button onClick={() => void signOut()} className="flex items-center gap-1.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground">
-              <LogOut className="size-4" /> <span className="max-sm:sr-only">{t.auth.signOut}</span>
+            {/* phone: no sign-out here (too easy to hit) — the avatar opens Sozlamalar, which has it */}
+            <Link to="/parent/settings" className="flex min-w-0 items-center gap-2 rounded-full p-0.5 hover:bg-secondary sm:rounded-md sm:px-2 sm:py-1.5"
+              aria-label={t.parent.settings} title={t.parent.settings} data-testid="parent-settings-link">
+              <UserAvatar name={profile?.full_name ?? ''} url={profile?.avatar_url} className="size-8" />
+              <span className="hidden truncate text-sm text-muted-foreground sm:inline">{profile?.full_name}</span>
+            </Link>
+            <button onClick={() => void signOut()} className="hidden items-center gap-1.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex">
+              <LogOut className="size-4" /> {t.auth.signOut}
             </button>
           </div>
         </div>

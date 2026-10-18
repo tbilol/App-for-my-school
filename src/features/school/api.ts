@@ -156,10 +156,15 @@ export const useEvents = () =>
 
 export function useMyEventResults() {
   const { profile } = useAuth()
+  return useEventResults(profile?.id)
+}
+
+/** A member's event results (own, or a parent's child — RLS: can_view_member). */
+export function useEventResults(userId: string | undefined) {
   return useQuery({
-    queryKey: ['events', 'results', profile?.id],
-    enabled: !!profile,
-    queryFn: () => rows<EventResult[]>(supabase.from('event_results').select('id, event_id, user_id, place, coins_awarded').eq('user_id', profile!.id)),
+    queryKey: ['events', 'results', userId],
+    enabled: !!userId,
+    queryFn: () => rows<EventResult[]>(supabase.from('event_results').select('id, event_id, user_id, place, coins_awarded').eq('user_id', userId!)),
   })
 }
 
