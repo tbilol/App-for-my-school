@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthProvider'
-import type { ClassRow, Profile } from '@/types/models'
+import type { ClassRow, Profile, StudentLevel, Subject } from '@/types/models'
 
 // Data layer for roster/parent/teacher management. Every read is narrowed by
 // RLS on the server (teachers only get their classes); the filters here are
@@ -21,13 +21,15 @@ export const manageKeys = {
   students: ['manage', 'students'] as const,
   parents: ['manage', 'parents'] as const,
   teachers: ['manage', 'teachers'] as const,
+  admins: ['manage', 'admins'] as const,
+  studentLevels: ['manage', 'student-levels'] as const,
   assignments: ['manage', 'assignments'] as const,
 }
 
 /** Classes the caller may manage: all for admin, assigned ones for teachers. */
 export function useManagedClasses() {
-  const { profile } = useAuth()
-  const isAdmin = profile?.role === 'admin'
+  const { profile, hasRole } = useAuth()
+  const isAdmin = hasRole('admin', 'super_admin')
   return useQuery({
     queryKey: [...manageKeys.classes, profile?.id],
     enabled: !!profile,
@@ -75,6 +77,22 @@ export function useTeachers() {
   })
 }
 
+/** Super admin: every admin-tier account (RLS: staff read all profiles). */
+export function useAdmins() {
+  return useQuery({
+    queryKey: manageKeys.admins,
+    queryFn: () => rows<Member[]>(supabase.from('profiles').select(MEMBER_COLS).in('role', ['admin', 'super_admin']).order('full_name')),
+  })
+}
+
+/** Daily-task levels of every student the caller manages (RLS-scoped). */
+export function useStudentLevels() {
+  return useQuery({
+    queryKey: manageKeys.studentLevels,
+    queryFn: () => rows<StudentLevel[]>(supabase.from('student_levels').select('*')),
+  })
+}
+
 /** Admin: every teacher↔class assignment. */
 export function useAssignments() {
   return useQuery({
@@ -108,6 +126,10 @@ export const useCreateTeacher = () =>
   useManageMutation(async (a: { fullName: string; password: string }) =>
     (await rpc<CreatedAccount[]>('create_teacher', { p_full_name: a.fullName, p_password: a.password }))[0])
 
+export const useCreateAdmin = () =>
+  useManageMutation(async (a: { fullName: string; password: string }) =>
+    (await rpc<CreatedAccount[]>('create_admin', { p_full_name: a.fullName, p_password: a.password }))[0])
+
 export const useCreateParent = () =>
   useManageMutation(async (a: { fullName: string; password: string; studentIds: string[] }) =>
     (await rpc<CreatedAccount[]>('create_parent', { p_full_name: a.fullName, p_password: a.password, p_student_ids: a.studentIds }))[0])
@@ -121,6 +143,11 @@ export const useUnlinkParent = () =>
 export const useUpdateMember = () =>
   useManageMutation((a: { userId: string; fullName?: string; classId?: string }) =>
     rpc<Profile>('update_member', { p_user: a.userId, p_full_name: a.fullName ?? null, p_class_id: a.classId ?? null }))
+
+/** levelId null clears the subject's level. */
+export const useSetStudentLevel = () =>
+  useManageMutation((a: { studentId: string; subject: Subject; levelId: string | null }) =>
+    rpc<StudentLevel | null>('set_student_level', { p_student: a.studentId, p_subject: a.subject, p_level: a.levelId }))
 
 export const useResetPassword = () =>
   useManageMutation((a: { userId: string; newPassword: string }) =>

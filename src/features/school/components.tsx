@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowDownRight, ArrowUpRight, ChevronRight, type LucideIcon } from 'lucide-react'
 import { cn, formatCoins, formatDate } from '@/lib/utils'
-import { useT } from '@/i18n'
-import type { CoinTransaction } from '@/types/models'
+import { fmt, useT } from '@/i18n'
+import type { HistoryRow } from './txGroups'
 
 export function SectionCard({
   title, to, action, children, className,
@@ -34,18 +34,24 @@ export function EmptyState({ icon: Icon, text, className }: { icon: LucideIcon; 
 }
 
 /** One ledger row: arrow, reason, category · subject · date, signed amount. */
-export function TxRow({ tx }: { tx: Pick<CoinTransaction, 'id' | 'amount' | 'direction' | 'category' | 'subject' | 'reason' | 'created_at'> }) {
+export function TxRow({ tx }: { tx: HistoryRow }) {
   const t = useT()
   const earn = tx.direction === 'earn'
+  // a day's daily-task coins for one subject, collapsed (groupDailyTx)
+  const daily = tx.daily
+  const dailyNote = daily && (daily.score ? fmt(t.daily.historyScore, { s: daily.score })
+    : daily.correct > 0 ? fmt(t.daily.historyCorrect, { n: daily.correct }) : null)
   return (
     <li className="flex items-center gap-3 px-4 py-2.5">
       <span className={cn('grid size-8 shrink-0 place-items-center rounded-full', earn ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive')}>
         {earn ? <ArrowUpRight className="size-4" /> : <ArrowDownRight className="size-4" />}
       </span>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium">{tx.reason || t.categories[tx.category]}</div>
+        <div className="truncate text-sm font-medium">{daily ? t.daily.historyTitle : tx.reason || t.categories[tx.category]}</div>
         <div className="truncate text-xs text-muted-foreground">
-          {t.categories[tx.category]}{tx.subject ? ` · ${t.subjects[tx.subject]}` : ''} · {formatDate(tx.created_at)}
+          {daily
+            ? `${tx.subject ? t.subjects[tx.subject] : ''} · ${formatDate(tx.created_at)}${dailyNote ? ` · ${dailyNote}` : ''}`
+            : `${t.categories[tx.category]}${tx.subject ? ` · ${t.subjects[tx.subject]}` : ''} · ${formatDate(tx.created_at)}`}
         </div>
       </div>
       <span className={cn('shrink-0 text-sm font-semibold tabular', earn ? 'text-success' : 'text-destructive')}>

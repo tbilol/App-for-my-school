@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRightLeft, EllipsisVertical, KeyRound, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { ArrowRightLeft, EllipsisVertical, GraduationCap, KeyRound, MessageSquare, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,13 +16,18 @@ import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useT } from '@/i18n'
 import {
-  useAddStudent, useDeleteMember, useManagedClasses, useResetPassword, useStudents, useUpdateMember, type Member,
+  useAddStudent, useDeleteMember, useManagedClasses, useResetPassword, useStudentLevels, useStudents, useUpdateMember, type Member,
 } from './api'
+import { StudentLevelsDialog } from './StudentLevelsDialog'
+import { useOpenConversation } from '@/features/messages/api'
+import { errorMessage } from '@/lib/errors'
+import { SUBJECTS } from '@/features/bank/api'
+import type { Subject } from '@/types/models'
 import { AccountFields, ConfirmDialog, CredentialsDialog, FormDialog, PasswordWithGenerate, type IssuedCredentials } from './dialogs'
 
 type Dialog =
   | { kind: 'add' }
-  | { kind: 'rename' | 'move' | 'reset' | 'delete'; member: Member }
+  | { kind: 'rename' | 'move' | 'reset' | 'delete' | 'levels'; member: Member }
   | null
 
 const MIN_PASSWORD = 6   // server enforces app_config.auth.min_password_length
@@ -27,10 +35,19 @@ const MIN_PASSWORD = 6   // server enforces app_config.auth.min_password_length
 /** Roster of one class at a time. Teachers see their assigned classes; admin sees all. */
 export function StudentRoster() {
   const t = useT()
-  const { profile } = useAuth()
-  const isAdmin = profile?.role === 'admin'
+  const { profile, hasRole } = useAuth()
+  const isAdmin = hasRole('admin', 'super_admin')
+  // Only the class teacher is a thread participant (admins aren't, in v1).
+  const isTeacher = profile?.role === 'teacher'
+  const navigate = useNavigate()
+  const openConversation = useOpenConversation()
+  const writeToParents = (studentId: string) => openConversation.mutate({ teacherId: profile!.id, studentId }, {
+    onSuccess: (id) => navigate(`/teacher?tab=messages&c=${id}`),
+    onError: (err) => toast.error(errorMessage(err)),
+  })
   const classes = useManagedClasses()
   const students = useStudents()
+  const studentLevels = useStudentLevels()
   const [classId, setClassId] = useState<string>('')
   const [dialog, setDialog] = useState<Dialog>(null)
   const [issued, setIssued] = useState<IssuedCredentials | null>(null)
@@ -47,6 +64,13 @@ export function StudentRoster() {
   useEffect(() => {
     if (!classId && classes.data?.length) setClassId(classes.data[0].id)
   }, [classes.data, classId])
+
+  // student → subject → level id
+  const levelsOf = useMemo(() => {
+    const m = new Map<string, Partial<Record<Subject, string>>>()
+    for (const l of studentLevels.data ?? []) m.set(l.user_id, { ...m.get(l.user_id), [l.subject]: l.level_id })
+    return m
+  }, [studentLevels.data])
 
   const roster = useMemo(() => (students.data ?? []).filter((s) => s.class_id === classId), [students.data, classId])
   const close = () => setDialog(null)
@@ -82,7 +106,17 @@ export function StudentRoster() {
               <UserAvatar name={s.full_name} />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-medium">{s.full_name}</div>
-                <div className="truncate font-mono text-xs text-muted-foreground">{s.login}</div>
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate font-mono text-xs text-muted-foreground">{s.login}</span>
+                  {studentLevels.isSuccess && (() => {
+                    const n = Object.keys(levelsOf.get(s.id) ?? {}).length
+                    return n < SUBJECTS.length && (
+                      <Badge variant="outline" className="shrink-0 border-transparent bg-warning/15 text-[10px] text-amber-700 dark:text-amber-300">
+                        {n === 0 ? t.studentLevel.notSet : t.studentLevel.partial}
+                      </Badge>
+                    )
+                  })()}
+                </div>
               </div>
               <CoinAmount value={s.coin_balance} className="text-sm" />
               <DropdownMenu>
@@ -90,6 +124,14 @@ export function StudentRoster() {
                   <Button variant="ghost" size="icon" aria-label={`${t.common.actions}: ${s.full_name}`}><EllipsisVertical /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {isTeacher && (
+                    <DropdownMenuItem onSelect={() => writeToParents(s.id)}>
+                      <MessageSquare /> {t.messages.writeToParents}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onSelect={() => setDialog({ kind: 'levels', member: s })}>
+                    <GraduationCap /> {t.studentLevel.action}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => { setName(s.full_name); setDialog({ kind: 'rename', member: s }) }}>
                     <Pencil /> {t.manage.rename}
                   </DropdownMenuItem>
@@ -177,6 +219,10 @@ export function StudentRoster() {
           description={t.manage.deleteConfirm} confirmLabel={t.common.delete}
           onConfirm={() => deleteMember.mutateAsync({ userId: dialog.member.id })}
         />
+      )}
+
+      {dialog?.kind === 'levels' && (
+        <StudentLevelsDialog student={dialog.member} current={levelsOf.get(dialog.member.id) ?? {}} onClose={close} />
       )}
 
       <CredentialsDialog issued={issued} onClose={() => setIssued(null)} />

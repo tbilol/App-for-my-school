@@ -9,13 +9,14 @@ import { adminNav } from './nav-items'
 
 /**
  * The admin app: a separate shell from the student app (dark sidebar, its own
- * routes, no coin balance, no bottom bar). Reached only by the admin role.
+ * routes, no coin balance, no bottom bar). Reached by admin and super_admin.
  */
 function AdminNavList({ onNavigate }: { onNavigate?: () => void }) {
   const t = useT()
+  const { hasRole } = useAuth()
   return (
     <nav className="flex flex-col gap-0.5 px-3" aria-label={t.nav.admin}>
-      {adminNav.map(({ to, label, icon: Icon }) => (
+      {adminNav.filter((i) => !i.roles || hasRole(...i.roles)).map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}
@@ -54,7 +55,7 @@ function SignOutButton() {
     <div className="m-3 flex items-center gap-2 rounded-lg bg-white/5 p-3">
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-white">{profile?.full_name}</div>
-        <div className="text-xs text-slate-400">{t.roles.admin}</div>
+        <div className="text-xs text-slate-400">{profile && t.roles[profile.role]}</div>
       </div>
       <button onClick={() => void signOut()} className="rounded-md p-2 text-slate-400 hover:bg-white/10 hover:text-white" aria-label={t.auth.signOut} title={t.auth.signOut}>
         <LogOut className="size-4" />

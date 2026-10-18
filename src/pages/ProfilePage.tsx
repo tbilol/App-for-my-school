@@ -11,6 +11,7 @@ import { useAchievementCatalog, useClasses, useLeaderboard, useMyAchievements, u
 import { SettingsSection } from '@/features/profile/SettingsSection'
 import { AchievementsSection } from '@/features/school/AchievementsSection'
 import { EmptyState, SectionCard, TxRow } from '@/features/school/components'
+import { groupDailyTx } from '@/features/school/txGroups'
 import { cn } from '@/lib/utils'
 import { useT } from '@/i18n'
 
@@ -37,7 +38,7 @@ export default function ProfilePage() {
     const ids = new Set((mine.data ?? []).filter((a) => a.status === 'verified').map((a) => a.catalog_id))
     return (catalog.data ?? []).filter((c) => ids.has(c.id))
   }, [catalog.data, mine.data])
-  const shown = (tx.data ?? []).filter((r) => filter === 'all' || r.direction === filter)
+  const shown = groupDailyTx(tx.data ?? []).filter((r) => filter === 'all' || r.direction === filter)
 
   if (!profile) return null
   return (

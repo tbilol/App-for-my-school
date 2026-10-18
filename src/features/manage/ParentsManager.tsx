@@ -72,8 +72,8 @@ type Dialog =
 
 export function ParentsManager() {
   const t = useT()
-  const { profile } = useAuth()
-  const isAdmin = profile?.role === 'admin'
+  const { hasRole } = useAuth()
+  const isAdmin = hasRole('admin', 'super_admin')
   const parents = useParents()
   const students = useStudents()
   const createParent = useCreateParent()

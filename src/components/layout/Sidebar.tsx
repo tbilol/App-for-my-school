@@ -39,7 +39,7 @@ export function Sidebar() {
         <Logo />
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3" aria-label={t.nav.mainNav}>
-        {primaryNav.map((item) => <SideLink key={item.to} item={item} />)}
+        {primaryNav.filter((i) => !i.roles || hasRole(...i.roles)).map((item) => <SideLink key={item.to} item={item} />)}
         {panels.length > 0 && (
           <>
             <div className="mt-5 mb-1 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">

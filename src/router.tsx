@@ -4,11 +4,10 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { RedirectIfAuthed, RequireAuth, RequireRole } from '@/features/auth/guards'
 import NotFoundPage from '@/pages/NotFoundPage'
 import LandingPage from '@/pages/onboarding/LandingPage'
-import LoginFormPage from '@/pages/onboarding/LoginFormPage'
 
 // Signed-in apps are code-split: a student never downloads the admin app and vice versa.
 const HomePage = lazy(() => import('@/pages/HomePage'))
-const ChallengesPage = lazy(() => import('@/pages/ChallengesPage'))
+const DailyPage = lazy(() => import('@/pages/DailyPage'))
 const ShopPage = lazy(() => import('@/pages/ShopPage'))
 const RatingsPage = lazy(() => import('@/pages/RatingsPage'))
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
@@ -17,6 +16,12 @@ const AnnouncementsPage = lazy(() => import('@/pages/AnnouncementsPage'))
 const TeacherPanel = lazy(() => import('@/pages/TeacherPanel'))
 const ParentLayout = lazy(() => import('@/components/layout/ParentLayout').then((m) => ({ default: m.ParentLayout })))
 const ParentHome = lazy(() => import('@/pages/parent/ParentHome'))
+const ParentCoinsPage = lazy(() => import('@/pages/parent/ParentCoinsPage'))
+const ParentDailyPage = lazy(() => import('@/pages/parent/ParentDailyPage'))
+const ParentRatingPage = lazy(() => import('@/pages/parent/ParentRatingPage'))
+const ParentMessagesPage = lazy(() => import('@/pages/parent/ParentMessagesPage'))
+const ParentSchoolPage = lazy(() => import('@/pages/parent/ParentSchoolPage'))
+const ParentSettingsPage = lazy(() => import('@/pages/parent/ParentSettingsPage'))
 const AdminLayout = lazy(() => import('@/components/layout/AdminLayout').then((m) => ({ default: m.AdminLayout })))
 const AdminClassesPage = lazy(() => import('@/pages/admin/AdminClassesPage'))
 const AdminTeachersPage = lazy(() => import('@/pages/admin/AdminTeachersPage'))
@@ -29,18 +34,17 @@ const AdminAchievementsPage = lazy(() => import('@/pages/admin/AdminAchievements
 const AdminEventsPage = lazy(() => import('@/pages/admin/AdminEventsPage'))
 const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'))
 const AdminEconomyPage = lazy(() => import('@/pages/admin/AdminEconomyPage'))
+const AdminAdminsPage = lazy(() => import('@/pages/admin/AdminAdminsPage'))
+const AdminBankPage = lazy(() => import('@/pages/admin/AdminBankPage'))
 
 export const router = createBrowserRouter([
   // ── Onboarding (signed-out only)
   {
     element: <RedirectIfAuthed />,
     children: [
+      // One login form for every role; the profile's role decides where it lands.
       { path: '/welcome', element: <LandingPage /> },
       { path: '/login', element: <Navigate to="/welcome" replace /> },
-      // Any form accepts any account; the profile's role decides where it lands.
-      { path: '/login/student', element: <LoginFormPage role="student" /> },
-      { path: '/login/teacher', element: <LoginFormPage role="teacher" /> },
-      { path: '/login/parent', element: <LoginFormPage role="parent" /> },
       { path: '/login/*', element: <Navigate to="/welcome" replace /> },
     ],
   },
@@ -56,7 +60,12 @@ export const router = createBrowserRouter([
             element: <AppLayout />,
             children: [
               { index: true, element: <HomePage /> },
-              { path: 'challenges', element: <ChallengesPage /> },
+              // The old challenges page is retired (ChallengesPage.tsx kept, unrouted); daily tasks replace it.
+              { path: 'challenges', element: <Navigate to="/daily" replace /> },
+              {
+                element: <RequireRole roles={['student']} />,
+                children: [{ path: 'daily', element: <DailyPage /> }],
+              },
               { path: 'shop', element: <ShopPage /> },
               { path: 'ratings', element: <RatingsPage /> },
               { path: 'profile', element: <ProfilePage /> },
@@ -76,11 +85,25 @@ export const router = createBrowserRouter([
       {
         element: <RequireRole roles={['parent']} />,
         children: [
-          { path: '/parent', element: <ParentLayout />, children: [{ index: true, element: <ParentHome /> }] },
+          {
+            path: '/parent',
+            element: <ParentLayout />,
+            children: [
+              { index: true, element: <ParentHome /> },
+              { path: 'coins', element: <ParentCoinsPage /> },
+              { path: 'daily', element: <ParentDailyPage /> },
+              { path: 'rating', element: <ParentRatingPage /> },
+              { path: 'messages', element: <ParentMessagesPage /> },
+              { path: 'messages/:id', element: <ParentMessagesPage /> },
+              { path: 'school', element: <ParentSchoolPage /> },
+              { path: 'settings', element: <ParentSettingsPage /> },
+              { path: '*', element: <Navigate to="/parent" replace /> },
+            ],
+          },
         ],
       },
       {
-        element: <RequireRole roles={['admin']} />,
+        element: <RequireRole roles={['admin', 'super_admin']} />,
         children: [
           {
             path: '/admin',
@@ -91,6 +114,7 @@ export const router = createBrowserRouter([
               { path: 'teachers', element: <AdminTeachersPage /> },
               { path: 'students', element: <AdminStudentsPage /> },
               { path: 'parents', element: <AdminParentsPage /> },
+              { path: 'bank', element: <AdminBankPage /> },
               { path: 'shop', element: <AdminShopPage /> },
               { path: 'orders', element: <AdminOrdersPage /> },
               { path: 'achievements', element: <AdminAchievementsPage /> },
@@ -98,6 +122,10 @@ export const router = createBrowserRouter([
               { path: 'announcements', element: <AdminAnnouncementsPage /> },
               { path: 'economy', element: <AdminEconomyPage /> },
               { path: 'settings', element: <AdminSettingsPage /> },
+              {
+                element: <RequireRole roles={['super_admin']} />,
+                children: [{ path: 'admins', element: <AdminAdminsPage /> }],
+              },
               { path: '*', element: <Navigate to="classes" replace /> },
             ],
           },

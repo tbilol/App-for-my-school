@@ -18,8 +18,9 @@ import { EmptyState } from './components'
 /** Feed for everyone; staff get a "new post" button and can delete their own posts (admin: any). */
 export function AnnouncementsFeed() {
   const t = useT()
-  const { profile } = useAuth()
-  const isStaff = profile?.role === 'teacher' || profile?.role === 'admin'
+  const { profile, hasRole } = useAuth()
+  const isStaff = hasRole('teacher', 'admin', 'super_admin')
+  const isAdmin = hasRole('admin', 'super_admin')
   const feed = useAnnouncements()
   const { create, remove } = useAnnouncementMutations()
   const [open, setOpen] = useState(false)
@@ -51,7 +52,7 @@ export function AnnouncementsFeed() {
                   <h3 className="mt-1 font-semibold">{a.title}</h3>
                   {a.body && <p className="mt-1 text-sm whitespace-pre-line text-muted-foreground">{a.body}</p>}
                 </div>
-                {isStaff && (profile?.role === 'admin' || a.created_by === profile?.id) && (
+                {isStaff && (isAdmin || a.created_by === profile?.id) && (
                   <Button variant="ghost" size="icon" className="shrink-0" aria-label={`${t.common.delete}: ${a.title}`} onClick={() => setDeleting(a.id)}>
                     <Trash2 />
                   </Button>

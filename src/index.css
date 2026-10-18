@@ -139,3 +139,10 @@
   /* numbers in balances/leaderboards shouldn't jitter */
   .tabular { font-variant-numeric: tabular-nums; }
 }
+
+/* Daily-task celebration confetti (SetRunner). Pieces fall and spin from the top. */
+@keyframes zs-confetti {
+  0%   { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--dx), 300px, 0) rotate(var(--rot)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .zs-confetti { display: none; } }
